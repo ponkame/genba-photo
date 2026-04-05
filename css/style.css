@@ -1,0 +1,580 @@
+/* ===== リセット & ベース ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #007AFF;
+  --red: #FF3B30;
+  --green: #34C759;
+  --orange: #FF9500;
+  --gray1: #F2F2F7;
+  --gray2: #E5E5EA;
+  --gray3: #C7C7CC;
+  --gray4: #8E8E93;
+  --text-primary: #000000;
+  --text-secondary: #6C6C70;
+  --header-height: 96px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+  font-size: 16px;
+  background: var(--gray1);
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+button { cursor: pointer; font-family: inherit; }
+input, textarea { font-family: inherit; }
+a { color: var(--blue); text-decoration: none; }
+
+/* ===== ヘッダー ===== */
+#app-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray2);
+  padding-top: var(--safe-top);
+}
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  height: 52px;
+}
+
+#header-title {
+  font-size: 17px;
+  font-weight: 600;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 17px;
+  padding: 4px 8px;
+  min-width: 60px;
+}
+.btn-icon.hidden { visibility: hidden; pointer-events: none; }
+
+/* ===== ステータスバー ===== */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--gray1);
+  font-size: 12px;
+  border-top: 1px solid var(--gray2);
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.connected { background: var(--green); }
+.status-dot.disconnected { background: var(--orange); }
+
+.status-label.connected { color: var(--text-secondary); }
+.status-label.disconnected { color: var(--orange); font-weight: 500; }
+
+.status-user { color: var(--text-secondary); flex: 1; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.btn-signin {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.btn-signout {
+  background: none;
+  border: none;
+  color: var(--gray4);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ===== メインコンテンツ ===== */
+#main {
+  margin-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+.view { width: 100%; }
+.view.hidden { display: none; }
+
+.scroll-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== 空の状態 ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 8px;
+  padding: 40px 20px;
+}
+.empty-state.hidden { display: none; }
+.empty-icon { font-size: 64px; }
+.empty-title { font-size: 17px; font-weight: 600; color: var(--text-secondary); }
+.empty-sub { font-size: 14px; color: var(--gray4); text-align: center; }
+
+/* ===== 現場リスト ===== */
+.list-group {
+  list-style: none;
+  background: white;
+  margin: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.site-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--gray2);
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-user-select: none;
+}
+.site-item:last-child { border-bottom: none; }
+.site-item:active { background: var(--gray1); }
+
+.site-item-content { flex: 1; min-width: 0; }
+.site-name { font-size: 16px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.site-address { font-size: 13px; color: var(--text-secondary); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.site-drive-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--gray4);
+}
+.site-drive-badge.linked { color: var(--green); }
+
+.site-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+.btn-info {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 20px;
+  padding: 4px;
+  line-height: 1;
+}
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 20px;
+  padding: 4px;
+  line-height: 1;
+}
+.site-chevron { color: var(--gray3); font-size: 18px; margin-left: 4px; }
+
+/* ===== カード ===== */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.card.hidden { display: none; }
+
+/* ===== Drive フォルダカード ===== */
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.folder-label { flex: 1; font-size: 14px; font-weight: 600; }
+.folder-url-text {
+  font-size: 12px;
+  color: var(--blue);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== 撮影ボタン ===== */
+.capture-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.capture-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 130px;
+  border-radius: 16px;
+  cursor: pointer;
+  gap: 10px;
+  transition: opacity 0.15s;
+  -webkit-user-select: none;
+}
+.capture-btn:active { opacity: 0.75; }
+.capture-btn.blue { background: linear-gradient(135deg, #007AFF, #0055CC); }
+.capture-btn.red  { background: linear-gradient(135deg, #FF3B30, #CC2200); }
+.capture-icon { font-size: 36px; }
+.capture-label { font-size: 15px; font-weight: 600; color: white; }
+
+/* ===== 撮影済みセクション ===== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.thumbnail-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.thumbnail-scroll::-webkit-scrollbar { display: none; }
+
+.thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--gray2);
+}
+.thumb-wrap img, .thumb-wrap video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.thumb-video-badge {
+  position: absolute;
+  bottom: 4px; left: 4px;
+  background: rgba(255,59,48,0.85);
+  color: white;
+  font-size: 10px;
+  border-radius: 10px;
+  padding: 2px 6px;
+}
+.thumb-remove {
+  position: absolute;
+  top: 2px; right: 2px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 22px; height: 22px;
+  font-size: 14px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+.thumb-add {
+  flex-shrink: 0;
+  width: 90px; height: 90px;
+  border-radius: 8px;
+  border: 2px dashed var(--blue);
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--blue);
+  font-size: 24px;
+  cursor: pointer;
+}
+.thumb-add-label { font-size: 11px; }
+
+/* ===== フォーム ===== */
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+.form-input {
+  width: 100%;
+  border: 1px solid var(--gray2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 16px;
+  background: var(--gray1);
+  outline: none;
+}
+.form-input:focus { border-color: var(--blue); background: white; }
+.form-textarea {
+  width: 100%;
+  border: 1px solid var(--gray2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 16px;
+  background: var(--gray1);
+  outline: none;
+  resize: none;
+}
+.form-textarea:focus { border-color: var(--blue); background: white; }
+
+/* ===== カテゴリチップ ===== */
+.chips-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.chips-scroll::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  font-size: 13px;
+  background: var(--gray2);
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.chip.selected { background: var(--blue); color: white; }
+
+/* ===== アップロードボタン ===== */
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary:active { opacity: 0.8; }
+.btn-primary:disabled { background: var(--gray3); cursor: not-allowed; }
+.btn-primary.hidden { display: none; }
+
+/* ===== 最近の写真グリッド ===== */
+#recent-section.hidden { display: none; }
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+}
+.recent-thumb {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--gray2);
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.recent-thumb-icon { font-size: 28px; }
+.recent-status-badge {
+  position: absolute;
+  bottom: 4px; right: 4px;
+  font-size: 14px;
+}
+
+/* ===== テキストボタン ===== */
+.btn-text-blue  { background: none; border: none; color: var(--blue);   font-size: 14px; font-weight: 500; padding: 4px; cursor: pointer; }
+.btn-text-red   { background: none; border: none; color: var(--red);    font-size: 14px; font-weight: 500; padding: 4px; cursor: pointer; }
+.btn-text-orange{ background: none; border: none; color: var(--orange); font-size: 14px; font-weight: 500; padding: 4px; cursor: pointer; }
+.btn-text-gray  { background: none; border: none; color: var(--gray4);  font-size: 16px; padding: 4px; cursor: pointer; }
+
+/* ===== モーダル ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.hidden { display: none; }
+
+.modal-sheet {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 600px;
+  padding-bottom: calc(20px + var(--safe-bottom));
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid var(--gray2);
+}
+.modal-header h3 { font-size: 17px; font-weight: 600; }
+.modal-body { padding: 16px; }
+
+/* ===== 現場情報モーダル本体 ===== */
+.site-info-header {
+  text-align: center;
+  padding: 20px 0 16px;
+}
+.site-info-icon { font-size: 48px; }
+.site-info-name { font-size: 20px; font-weight: 700; margin-top: 8px; }
+.site-info-address { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+.drive-info-card {
+  background: var(--gray1);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+.drive-info-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.drive-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 6px;
+  text-align: left;
+  text-decoration: none;
+}
+.drive-action-btn.open   { background: rgba(0,122,255,0.1); color: var(--blue); }
+.drive-action-btn.share  { background: rgba(52,199,89,0.1);  color: var(--green); }
+.drive-action-btn.copy   { background: rgba(255,149,0,0.1);  color: var(--orange); }
+
+.no-drive-msg {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== フルスクリーンオーバーレイ ===== */
+.full-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.full-overlay.hidden { display: none; }
+
+.overlay-card {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 36px 32px;
+  min-width: 260px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--gray2);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.overlay-main-text { font-size: 16px; font-weight: 600; }
+.overlay-count-text { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+
+.progress-bar {
+  width: 200px; height: 6px;
+  background: var(--gray2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.success-card { }
+.success-icon { font-size: 72px; }
+.success-title { font-size: 22px; font-weight: 700; }
+.success-sub { font-size: 15px; color: var(--text-secondary); }
+
+.btn-white {
+  background: white;
+  color: var(--blue);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* ===== ユーティリティ ===== */
+.hidden { display: none !important; }

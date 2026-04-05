@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="現場写真管理">
+  <meta name="theme-color" content="#007AFF">
+  <title>現場写真管理</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://accounts.google.com/gsi/client" async></script>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header id="app-header">
+    <div class="header-bar">
+      <button id="btn-back" class="btn-icon hidden" onclick="goBack()">
+        &#8249; 戻る
+      </button>
+      <h1 id="header-title">現場一覧</h1>
+      <button id="btn-add-site" class="btn-icon" onclick="showAddSiteModal()">
+        <span style="font-size:24px;font-weight:300;">＋</span>
+      </button>
+    </div>
+    <div id="drive-status-bar" class="status-bar">
+      <span id="status-icon" class="status-dot disconnected"></span>
+      <span id="status-text" class="status-label disconnected">Google Drive 未接続</span>
+      <span id="status-user" class="status-user"></span>
+      <button id="btn-signin" class="btn-signin" onclick="driveSignIn()">サインイン</button>
+      <button id="btn-signout" class="btn-signout hidden" onclick="driveSignOut()">⚙ サインアウト</button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main id="main">
+
+    <!-- 現場一覧ビュー -->
+    <div id="view-sites" class="view">
+      <div id="sites-empty" class="empty-state hidden">
+        <div class="empty-icon">🏗</div>
+        <p class="empty-title">現場が登録されていません</p>
+        <p class="empty-sub">右上の ＋ ボタンから追加してください</p>
+      </div>
+      <ul id="sites-list" class="list-group"></ul>
+    </div>
+
+    <!-- 撮影・アップロードビュー -->
+    <div id="view-capture" class="view hidden">
+      <div class="scroll-content">
+
+        <!-- Drive フォルダリンク -->
+        <div id="drive-folder-card" class="card hidden">
+          <div class="folder-row">
+            <span>📁</span>
+            <span class="folder-label">Google Drive 保存先</span>
+            <button id="btn-share-folder" class="btn-text-blue" onclick="shareFolder()">共有</button>
+            <button id="btn-copy-folder" class="btn-text-orange" onclick="copyFolderURL()">コピー</button>
+          </div>
+          <a id="folder-url-link" href="#" target="_blank" class="folder-url-text"></a>
+        </div>
+
+        <!-- 撮影ボタン -->
+        <div class="capture-buttons">
+          <label class="capture-btn blue">
+            <input type="file" id="input-photo" accept="image/*" capture="environment" multiple style="display:none" onchange="onPhotoSelected(event)">
+            <span class="capture-icon">📷</span>
+            <span class="capture-label">写真を撮影</span>
+          </label>
+          <label class="capture-btn red">
+            <input type="file" id="input-video" accept="video/*" capture="environment" style="display:none" onchange="onVideoSelected(event)">
+            <span class="capture-icon">🎥</span>
+            <span class="capture-label">動画を撮影</span>
+          </label>
+        </div>
+
+        <!-- 撮影済みアイテム -->
+        <div id="captured-section" class="card hidden">
+          <div class="section-header">
+            <span id="captured-count-label">撮影済み (0件)</span>
+            <button class="btn-text-red" onclick="clearAllCaptures()">すべてクリア</button>
+          </div>
+          <div id="captured-thumbnails" class="thumbnail-scroll"></div>
+        </div>
+
+        <!-- 撮影情報 -->
+        <div id="metadata-section" class="card hidden">
+          <h3 class="section-title">撮影情報</h3>
+          <div class="form-group">
+            <label class="form-label">カテゴリ</label>
+            <div id="category-chips" class="chips-scroll"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">撮影者名</label>
+            <input type="text" id="input-photographer" class="form-input" placeholder="名前を入力">
+          </div>
+          <div class="form-group">
+            <label class="form-label">メモ</label>
+            <textarea id="input-memo" class="form-textarea" placeholder="メモを入力" rows="3"></textarea>
+          </div>
+        </div>
+
+        <!-- アップロードボタン -->
+        <button id="btn-upload" class="btn-primary hidden" onclick="uploadAll()">
+          ☁ <span id="upload-btn-text">アップロード</span>
+        </button>
+
+        <!-- 最近の写真・動画 -->
+        <div id="recent-section" class="hidden">
+          <h3 class="section-title">最近の写真・動画</h3>
+          <div id="recent-grid" class="photo-grid"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- モーダル: 現場追加 -->
+  <div id="modal-add-site" class="modal-overlay hidden" onclick="closeAddSiteModal()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <button class="btn-text-gray" onclick="closeAddSiteModal()">キャンセル</button>
+        <h3>現場を追加</h3>
+        <button id="btn-confirm-add" class="btn-text-blue" onclick="confirmAddSite()" disabled>追加</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">現場名</label>
+          <input type="text" id="input-site-name" class="form-input" placeholder="例: 東京駅前ビル新築工事" oninput="onSiteNameInput()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">住所（任意）</label>
+          <input type="text" id="input-site-address" class="form-input" placeholder="例: 東京都千代田区丸の内1-1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル: 現場情報 -->
+  <div id="modal-site-info" class="modal-overlay hidden" onclick="closeSiteInfoModal()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div></div>
+        <h3>現場情報</h3>
+        <button class="btn-text-blue" onclick="closeSiteInfoModal()">閉じる</button>
+      </div>
+      <div id="site-info-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- オーバーレイ: アップロード中 -->
+  <div id="overlay-uploading" class="full-overlay hidden">
+    <div class="overlay-card">
+      <div class="spinner"></div>
+      <p id="upload-progress-text" class="overlay-main-text">アップロード中...</p>
+      <p id="upload-count-text" class="overlay-count-text"></p>
+      <div class="progress-bar">
+        <div id="upload-progress-fill" class="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- オーバーレイ: 完了 -->
+  <div id="overlay-success" class="full-overlay hidden" onclick="closeSuccess()">
+    <div class="overlay-card success-card">
+      <div class="success-icon">✅</div>
+      <h2 class="success-title">アップロード完了！</h2>
+      <p id="success-count-text" class="success-sub"></p>
+      <button class="btn-white" onclick="closeSuccess()">OK</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
