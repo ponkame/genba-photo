@@ -60,24 +60,21 @@ function defaultSites() {
 let tokenClient = null;
 
 function initGoogleAuth() {
-  if (typeof google === 'undefined') {
-    setTimeout(initGoogleAuth, 300);
-    return;
-  }
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    callback: (resp) => {
-      if (resp.access_token) {
-        state.accessToken = resp.access_token;
-        // トークンの有効期限後にリセット
-        setTimeout(() => { state.accessToken = null; updateStatusBar(); }, (resp.expires_in - 60) * 1000);
-        // ユーザー情報取得
-        fetchUserInfo();
-        updateStatusBar();
+  const hash = location.hash;
+  if (hash && hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get('access_token');
+    const expiresIn = params.get('expires_in');
+    if (token) {
+      state.accessToken = token;
+      history.replaceState(null, '', location.pathname);
+      if (expiresIn) {
+        setTimeout(() => { state.accessToken = null; updateStatusBar(); },
+          (parseInt(expiresIn) - 60) * 1000);
       }
-    },
-  });
+      fetchUserInfo();
+    }
+  }
 }
 
 async function fetchUserInfo() {
@@ -90,8 +87,13 @@ async function fetchUserInfo() {
 }
 
 function driveSignIn() {
-  if (!tokenClient) { alert('Google認証ライブラリを読み込み中です。少し待ってから再試行してください。'); return; }
-  tokenClient.requestAccessToken({ prompt: '' });
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: 'https://ponkame.github.io/genba-photo/',
+    response_type: 'token',
+    scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+  });
+  location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
 }
 
 function driveSignOut() {
