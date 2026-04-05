@@ -1,7 +1,7 @@
 // ============================================================
 //  ⚠️ ここを自分のGoogle Cloud ConsoleのクライアントIDに変更する
 // ============================================================
-const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+const CLIENT_ID = '430279375551-1s4ntl68d6n0qcgni7p2c1fsldmdhe3l.apps.googleusercontent.com';
 // ============================================================
 
 // ===== カテゴリ定義 =====
